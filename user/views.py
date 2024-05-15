@@ -2,8 +2,10 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import Userserializer
-from .models import User
+from .models import User, Deviceinfo
+from django.contrib.auth.models import Group
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import status
 import jwt
 import datetime
 
@@ -14,6 +16,10 @@ class Registerview(APIView):
         serializer = Userserializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        user = User.objects.get(username=serializer.data['username'])
+        group = Group.objects.get(name='Normal User')
+        user.groups.add(group)
+        user.save()
         return Response({'details':serializer.data})
 
 class Loginview(APIView):
@@ -21,24 +27,33 @@ class Loginview(APIView):
     def post(self,request):
         username = request.data['username']
         password = request.data['password']
-        image_url = request.data['image_url']
+        sys_id = request.data['device_id']
 
         user = User.objects.filter(username=username).first()
-
         if user is None:
-            raise AuthenticationFailed('User not available')
+            raise AuthenticationFailed('User not found')
         if not user.check_password(password):
             raise AuthenticationFailed('Invalid password')
 
         payload = {
             'id':user.id,
             'iat':datetime.datetime.utcnow(),
-            'exp':datetime.datetime.utcnow() + datetime.timedelta(seconds=20)
+            'exp':datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
         }
 
+        user_device = Deviceinfo.objects.filter(deviceid=sys_id)
+        if len(user_device) == 0:
+            Deviceinfo.objects.create(user_id_id=user.id, deviceid=sys_id)
+        else:
+            pass
+
         token = jwt.encode(payload,'secret',algorithm='HS256')
-        # serializers = Userserializer(user)
-        return Response({'token':token})
+        role = user.groups.get(user=user.id).name
+        response = {}
+        response['username'] = user.username
+        response['role'] = role
+        response['token'] = token
+        return Response({"details":response})
 
 class WhoAmI(APIView):
 
@@ -55,3 +70,11 @@ class WhoAmI(APIView):
         user = User.objects.filter(id=payload['id'])
         serializer = Userserializer(user,many=True)
         return Response({'details':serializer.data})
+
+class AllUserList(APIView):
+
+    def get(self,request):
+        user = User.objects.all()
+        userList = Userserializer(user,many=True)
+        return Response({'details':userList.data},status=status.HTTP_200_OK)
+
