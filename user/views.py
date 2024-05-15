@@ -5,6 +5,7 @@ from .serializers import Userserializer
 from .models import User, Deviceinfo
 from django.contrib.auth.models import Group
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import status
 import jwt
 import datetime
 
@@ -69,3 +70,11 @@ class WhoAmI(APIView):
         user = User.objects.filter(id=payload['id'])
         serializer = Userserializer(user,many=True)
         return Response({'details':serializer.data})
+
+class AllUserList(APIView):
+
+    def get(self,request):
+        user = User.objects.all()
+        userList = Userserializer(user,many=True)
+        return Response({'details':userList.data},status=status.HTTP_200_OK)
+
