@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-zc%6tb2^v=8ci1!do@u5tkqmqs9yb9%+i-k3z14mumq(5qf&i^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
@@ -85,10 +85,10 @@ WSGI_APPLICATION = 'premic.wsgi.application'
 DATABASES = {
     'default': {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
+        "NAME": "premic",
         "USER": "postgres",
         "PASSWORD": "postgres",
-        "HOST": "db",
+        "HOST": "localhost",
         "PORT": 5432,
     }
 }
@@ -111,6 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+CORS_ORIGIN_ALLOW_ALL = True  # Allow requests from any origin during development
 
 
 # Internationalization
