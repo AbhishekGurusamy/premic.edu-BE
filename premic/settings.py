@@ -85,10 +85,10 @@ WSGI_APPLICATION = 'premic.wsgi.application'
 DATABASES = {
     'default': {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "premic",
+        "NAME": "django_rds_test",
         "USER": "postgres",
         "PASSWORD": "postgres",
-        "HOST": "localhost",
+        "HOST": "django-backend-db.c9aos04y8ltm.ap-south-1.rds.amazonaws.com",
         "PORT": 5432,
     }
 }
