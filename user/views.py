@@ -58,7 +58,8 @@ class Loginview(APIView):
 class WhoAmI(APIView):
 
     def get(self,request):
-        token = request.data['token']
+        response = {}
+        token = request.headers.get('Authorization')
 
         if not token:
             raise AuthenticationFailed('Not Authorized')
@@ -69,7 +70,15 @@ class WhoAmI(APIView):
 
         user = User.objects.filter(id=payload['id'])
         serializer = Userserializer(user,many=True)
-        return Response({'details':serializer.data})
+        if serializer:
+            user = User.objects.filter(username=user[0].username).first()
+            role = user.groups.get(user=user.id).name
+
+            response['id'] = user.id
+            response['username'] = user.username
+            response['role'] = role
+            return Response(response, status=status.HTTP_200_OK)
+        return Response({'error':'WhoamI failed'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class AllUserList(APIView):
 
